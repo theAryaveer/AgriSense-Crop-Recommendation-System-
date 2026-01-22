@@ -365,86 +365,20 @@ def analyze():
                 }
             }), 400
         
-        # Use Gemini 1.5 Flash with JSON mode
-        # model = genai.GenerativeModel(
-        #     model_name='gemini-2.5-flash',
-        #     generation_config={"response_mime_type": "application/json"}
-        # )
-        
-        # prompt = f"""
-        # You are an agricultural expert for India. For location: {location}
-        
-        # Estimate typical soil and climate parameters based on this location.
-        # Return ONLY valid JSON with realistic agricultural values for India:
-        # {{
-        #   "N": <nitrogen in kg/ha, range 0-140>,
-        #   "P": <phosphorus in kg/ha, range 5-145>,
-        #   "K": <potassium in kg/ha, range 5-205>,
-        #   "temperature": <temperature in Celsius, range 10-50>,
-        #   "humidity": <humidity in %, range 15-100>,
-        #   "ph": <soil pH, range 3.5-9.5>,
-        #   "rainfall": <annual rainfall in cm, range 20-300>
-        # }}
-        
-        # Provide realistic estimates based on typical conditions for this region.
-        # """
-        
-        # response = model.generate_content(prompt)
-        
-        # # Parse JSON response
-        # try:
-        #     parameters = json.loads(response.text)
-        # except json.JSONDecodeError:
-        #     # Fallback parsing
-        #     json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
-        #     if json_match:
-        #         parameters = json.loads(json_match.group(0))
-        #     else:
-        #         raise ValueError("Invalid AI response format")
-        
-        # # Validate parameters
-        # required = ['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall']
-        # for param in required:
-        #     if param not in parameters:
-        #         return jsonify({
-        #             'success': False,
-        #             'error': {
-        #                 'en': f'Missing parameter: {param}',
-        #                 'hi': f'गायब पैरामीटर: {param}'
-        #             }
-        #         }), 500
-        #     # Convert to float (keep realistic values, no clamping to 0-1)
-        #     parameters[param] = float(parameters[param])
-        
-        # return jsonify({
-        #     'success': True,
-        #     'parameters': parameters,
-        #     'location': location
-        # })
-
-        # Parse JSON response
-        try:
-            parameters = json.loads(response.text)
-        except json.JSONDecodeError:
-            # Fallback based on region/city heuristics if Gemini fails or for safety
-            # But here we rely on Gemini to do its best
-            pass
-
         # --- HYBRID AI LOGIC START ---
         real_weather = None
-        if location: # Changed city_input to location
-            real_weather = get_real_weather(location) # Changed city_input to location
+        if location:
+            real_weather = get_real_weather(location)
             if real_weather:
-                print(f"✅ Real Weather Found for {location}: {real_weather}") # Changed city_input to location
+                print(f"✅ Real Weather Found for {location}: {real_weather}")
         
-        # specific_prompts = [] - deprecated logic, constructing prompt dynamically
-        
+        # Construct prompt dynamically based on weather availability
         prompt = ""
         if real_weather:
             # HYBRID PROMPT: Real Temp/Humidity provided, ask only for Soil
             prompt = f"""
             I have real-time weather data for {location}:
-            - Temperature: {real_weather['temperature']}°C
+            - Temperature: {real_weather['temp']}°C
             - Humidity: {real_weather['humidity']}%
             
             Based on this location ({location}) and its typical climate/soil, estimate the following soil parameters:
@@ -495,7 +429,7 @@ def analyze():
             # --- HYBRID MERGE ---
             if real_weather:
                 # Inject real data into the result
-                estimated_data['temperature'] = real_weather['temperature']
+                estimated_data['temperature'] = real_weather['temp']
                 estimated_data['humidity'] = real_weather['humidity']
                 estimated_data['weather_source'] = 'live'
             else:

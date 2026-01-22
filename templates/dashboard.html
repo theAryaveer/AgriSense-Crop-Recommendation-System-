@@ -1220,7 +1220,7 @@
                     return;
                 }
 
-                const p = estimateResult.data; // Assuming estimateResult.data contains the parameters
+                const p = estimateResult.parameters; // Fixed: /estimate returns 'parameters', not 'data'
                 if (p) {
                     // Populate inputs (NEW IDs)
                     document.getElementById('nitrogen').value = p.N;
