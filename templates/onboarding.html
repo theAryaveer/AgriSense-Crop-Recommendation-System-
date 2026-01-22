@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome | Smart Crop Recommendation System</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-green: #2d6635;
+            --secondary-green: #4a9d5f;
+            --light-green: #7bc47f;
+            --white: #ffffff;
+            --dark-text: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .05) 35px, rgba(255, 255, 255, .05) 70px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .onboarding-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem;
+        }
+
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .icon-hero {
+            font-size: 5rem;
+            color: var(--secondary-green);
+            margin-bottom: 1.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border: 2px solid var(--light-green);
+            border-radius: 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--secondary-green);
+            box-shadow: 0 0 0 0.25rem rgba(74, 157, 95, 0.25);
+        }
+
+        .language-options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .language-option {
+            flex: 1;
+        }
+
+        .language-option input[type="radio"] {
+            display: none;
+        }
+
+        .language-label {
+            display: block;
+            padding: 1rem 1.5rem;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .language-option input[type="radio"]:checked+.language-label {
+            background: var(--secondary-green);
+            color: white;
+            border-color: var(--secondary-green);
+            transform: scale(1.05);
+        }
+
+        .language-label:hover {
+            border-color: var(--secondary-green);
+        }
+
+        .flag-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--secondary-green) 0%, var(--primary-green) 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(45, 102, 53, 0.3);
+            margin-top: 2rem;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(45, 102, 53, 0.4);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .spinner-border-sm {
+            width: 1.2rem;
+            height: 1.2rem;
+            border-width: 0.15rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @media (max-width: 576px) {
+            .welcome-card {
+                padding: 2rem 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .language-options {
+                flex-direction: column;
+            }
+        }
+
+        /* Voice Input Styles */
+        .input-group-voice {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-mic {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--secondary-green);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 5px;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .btn-mic:hover {
+            color: var(--primary-green);
+            background: rgba(46, 125, 50, 0.1);
+        }
+
+        .btn-mic.listening {
+            color: #d32f2f;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.7);
+            }
+
+            70% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(211, 47, 47, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
+            }
+        }
+
+        .mic-status {
+            font-size: 0.8rem;
+            color: var(--secondary-green);
+            margin-top: 5px;
+            display: none;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="onboarding-container">
+        <div class="welcome-card">
+            <i class="fas fa-seedling icon-hero"></i>
+            <h1>🌾 Welcome!</h1>
+            <p class="subtitle">Let's find the perfect crop for your farm</p>
+
+            <form id="onboardingForm">
+                <div class="form-group">
+                    <label for="farmerName">
+                        <i class="fas fa-user"></i> Your Name
+                    </label>
+                    <div class="input-group-voice">
+                        <input type="text" id="farmerName" name="name" placeholder="Enter your name" required
+                            style="padding-right: 45px;">
+                        <button type="button" class="btn-mic" onclick="startVoiceInput('farmerName', this)"
+                            title="Speak Name">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <div class="mic-status">Listening... Speak now</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cityName">
+                        <i class="fas fa-map-marker-alt"></i> Your City / Village
+                    </label>
+                    <div class="input-group-voice">
+                        <input type="text" id="cityName" name="city" placeholder="e.g., Mumbai, Jaipur" required
+                            style="padding-right: 45px;">
+                        <button type="button" class="btn-mic" onclick="startVoiceInput('cityName', this)"
+                            title="Speak City Name">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+                    </div>
+                    <div class="mic-status">Listening... Speak now</div>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <i class="fas fa-language"></i> Preferred Language
+                    </label>
+                    <div class="language-options">
+                        <div class="language-option">
+                            <input type="radio" id="langEnglish" name="language" value="en" checked>
+                            <label for="langEnglish" class="language-label">
+                                <span class="flag-icon">Eng</span>
+                                English
+                            </label>
+                        </div>
+                        <div class="language-option">
+                            <input type="radio" id="langHindi" name="language" value="hi">
+                            <label for="langHindi" class="language-label">
+                                <span class="flag-icon">Hin</span>
+                                हिंदी
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-start" id="startBtn">
+                    <i class="fas fa-arrow-right"></i>
+                    Start Journey
+                    <span class="spinner-border spinner-border-sm ms-2 d-none" id="spinner"></span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Voice Input Logic
+        function startVoiceInput(inputId, btnElement) {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert('Voice input is not supported in this browser. Please use Chrome/Edge.');
+                return;
+            }
+
+            const recognition = new webkitSpeechRecognition();
+            // Check selected language
+            const lang = document.querySelector('input[name="language"]:checked').value;
+            recognition.lang = lang === 'hi' ? 'hi-IN' : 'en-IN';
+
+            const micBtn = btnElement;
+            const micStatus = micBtn.parentElement.nextElementSibling; // Get status div below input-group
+            const inputField = document.getElementById(inputId);
+
+            recognition.onstart = function () {
+                micBtn.classList.add('listening');
+                micStatus.style.display = 'block';
+                micStatus.textContent = lang === 'hi' ? 'सुन रहा हूँ... बोलें' : 'Listening... Speak now';
+            };
+
+            recognition.onresult = function (event) {
+                const transcript = event.results[0][0].transcript;
+                // Remove trailing punctuation if any and capitalize
+                let finalTxt = transcript.replace(/[.,!]/g, '');
+                // Simple capitalization
+                finalTxt = finalTxt.charAt(0).toUpperCase() + finalTxt.slice(1);
+                inputField.value = finalTxt;
+            };
+
+            recognition.onerror = function (event) {
+                console.error('Speech recognition error', event.error);
+                micStatus.textContent = 'Error. Try again.';
+            };
+
+            recognition.onend = function () {
+                micBtn.classList.remove('listening');
+                setTimeout(() => {
+                    micStatus.style.display = 'none';
+                }, 2000);
+            };
+
+            recognition.start();
+        }
+
+        document.getElementById('onboardingForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('farmerName').value.trim();
+            const city = document.getElementById('cityName').value.trim();
+            const language = document.querySelector('input[name="language"]:checked').value;
+
+            if (!name || !city) {
+                alert('Please enter your name and city');
+                return;
+            }
+
+            // Show loading state
+            const btn = document.getElementById('startBtn');
+            const spinner = document.getElementById('spinner');
+            btn.disabled = true;
+            spinner.classList.remove('d-none');
+
+            try {
+                const response = await fetch('/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, city, language })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Redirect to dashboard
+                    window.location.href = result.redirect;
+                } else {
+                    // Handle bilingual error messages
+                    let errorMsg = 'Unknown error';
+                    if (result.error) {
+                        if (typeof result.error === 'object') {
+                            errorMsg = result.error[language] || result.error.en || JSON.stringify(result.error);
+                        } else {
+                            errorMsg = result.error;
+                        }
+                    }
+                    alert('Error: ' + errorMsg);
+                    btn.disabled = false;
+                    spinner.classList.add('d-none');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+                btn.disabled = false;
+                spinner.classList.add('d-none');
+            }
+        });
+    </script>
+</body>
+
+</html>

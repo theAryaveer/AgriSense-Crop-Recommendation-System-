@@ -1,0 +1,117 @@
+{
+  "rice": {
+    "target_N": 120, "target_P": 60, "target_K": 60,
+    "yield": 2400, "price": 22,
+    "info": "Price based on MSP (~₹2,200/quintal). Needs standing water."
+  },
+  "wheat": {
+    "target_N": 120, "target_P": 60, "target_K": 40,
+    "yield": 2000, "price": 23,
+    "info": "Price based on MSP (~₹2,275/quintal). Rabi staple."
+  },
+  "maize": {
+    "target_N": 120, "target_P": 60, "target_K": 50,
+    "yield": 2500, "price": 21,
+    "info": "Wholesale mandi rate (~₹2,090/quintal). Used for poultry feed."
+  },
+  "chickpea": {
+    "target_N": 20, "target_P": 60, "target_K": 40,
+    "yield": 800, "price": 54,
+    "info": "Chana. MSP is approx ₹5,440/quintal."
+  },
+  "kidneybeans": {
+    "target_N": 30, "target_P": 60, "target_K": 40,
+    "yield": 700, "price": 75,
+    "info": "Rajma. Wholesale rate typically ₹7,000-8,000/quintal."
+  },
+  "pigeonpeas": {
+    "target_N": 20, "target_P": 60, "target_K": 20,
+    "yield": 600, "price": 70,
+    "info": "Tur/Arhar. Mandi rates are often near ₹7,000/quintal."
+  },
+  "mothbeans": {
+    "target_N": 20, "target_P": 40, "target_K": 20,
+    "yield": 400, "price": 65,
+    "info": "Drought crop. Wholesale approx ₹6,500/quintal."
+  },
+  "mungbean": {
+    "target_N": 20, "target_P": 40, "target_K": 20,
+    "yield": 500, "price": 75,
+    "info": "Green Gram. Mandi rates fluctuate ₹7,000-8,000/quintal."
+  },
+  "blackgram": {
+    "target_N": 20, "target_P": 40, "target_K": 20,
+    "yield": 450, "price": 68,
+    "info": "Urad. Wholesale approx ₹6,800/quintal."
+  },
+  "lentil": {
+    "target_N": 20, "target_P": 50, "target_K": 20,
+    "yield": 550, "price": 62,
+    "info": "Masoor. Mandi rates around ₹6,000-6,500/quintal."
+  },
+  "pomegranate": {
+    "target_N": 200, "target_P": 150, "target_K": 150,
+    "yield": 4000, "price": 65,
+    "info": "Bhagwa variety bulk rate. Varies by quality (₹40-100)."
+  },
+  "banana": {
+    "target_N": 250, "target_P": 80, "target_K": 300,
+    "yield": 20000, "price": 10,
+    "info": "Sold per ton. Farm gate price ~₹10-12/kg (₹1000/quintal)."
+  },
+  "mango": {
+    "target_N": 150, "target_P": 80, "target_K": 100,
+    "yield": 3500, "price": 35,
+    "info": "Bulk orchard price. Retail is higher."
+  },
+  "grapes": {
+    "target_N": 200, "target_P": 150, "target_K": 250,
+    "yield": 8000, "price": 45,
+    "info": "Export quality wholesale. Domestic bulk is lower."
+  },
+  "watermelon": {
+    "target_N": 100, "target_P": 60, "target_K": 80,
+    "yield": 12000, "price": 8,
+    "info": "Farm gate price is very low (₹6-10/kg) due to high weight."
+  },
+  "muskmelon": {
+    "target_N": 100, "target_P": 60, "target_K": 80,
+    "yield": 8000, "price": 15,
+    "info": "Kharbuja. Wholesale rates avg ₹12-18/kg."
+  },
+  "apple": {
+    "target_N": 150, "target_P": 100, "target_K": 150,
+    "yield": 6000, "price": 60,
+    "info": "Shimla/Kashmir Mandi bulk rate (Standard box)."
+  },
+  "orange": {
+    "target_N": 200, "target_P": 80, "target_K": 150,
+    "yield": 7000, "price": 25,
+    "info": "Nagpur Mandi bulk rate."
+  },
+  "papaya": {
+    "target_N": 200, "target_P": 150, "target_K": 250,
+    "yield": 15000, "price": 12,
+    "info": "Farm gate price. Highly perishable."
+  },
+  "coconut": {
+    "target_N": 150, "target_P": 80, "target_K": 250,
+    "yield": 4000, "price": 28,
+    "info": "Wholesale ball copra / raw nut converted to weight."
+  },
+  "cotton": {
+    "target_N": 120, "target_P": 60, "target_K": 60,
+    "yield": 900, "price": 68,
+    "info": "Kapas. MSP is approx ₹6,600-7,000/quintal."
+  },
+  "jute": {
+    "target_N": 80, "target_P": 40, "target_K": 40,
+    "yield": 1000, "price": 50,
+    "info": "MSP approx ₹5,000/quintal."
+  },
+  "coffee": {
+    "target_N": 120, "target_P": 80, "target_K": 120,
+    "yield": 800, "price": 160,
+    "info": "Robusta raw bean wholesale price."
+  }
+}

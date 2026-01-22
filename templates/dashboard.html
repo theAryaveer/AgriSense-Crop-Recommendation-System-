@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriSense | AI Crop Advisor</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/agrisense_logo.png') }}">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* Eco-Green Palette */
+            --primary-green: #2E7d32;
+            --secondary-green: #81c784;
+            --light-green: #a5d6a7;
+            --accent-gold: #f9a825;
+            --white: #ffffff;
+            --light-bg: #f1f8e9;
+            --dark-text: #1b5e20;
+            --tech-blue: #0dcaf0;
+            /* Rebranding Color */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+            min-height: 100vh;
+            color: var(--dark-text);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255, 255, 255, .05) 35px, rgba(255, 255, 255, .05) 70px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Header */
+        .top-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .welcome-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        .lang-toggle {
+            background: var(--secondary-green);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .lang-toggle:hover {
+            background: var(--primary-green);
+            transform: translateY(-2px);
+        }
+
+        .container-main {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Card Styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-green);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title i {
+            color: var(--secondary-green);
+        }
+
+        /* Progress Indicator */
+        .progress-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-indicator::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 25%;
+            right: 25%;
+            height: 3px;
+            background: #ddd;
+            z-index: 0;
+        }
+
+        .progress-indicator.step-2::before {
+            background: var(--secondary-green);
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd;
+            color: #999;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active .progress-circle {
+            background: var(--secondary-green);
+            color: white;
+            box-shadow: 0 4px 12px rgba(74, 157, 95, 0.4);
+        }
+
+        .progress-step.completed .progress-circle {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .progress-label {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .progress-step.active .progress-label {
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 0.95rem;
+        }
+
+        .form-label-large {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-green);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-green) !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .brand-tagline {
+            font-size: 0.8rem;
+            color: #666;
+            margin-left: 10px;
+            font-weight: 400;
+            display: none;
+        }
+
+        @media(min-width: 768px) {
+            .brand-tagline {
+                display: inline-block;
+            }
+        }
+
+        /* Tech Blue Button */
+        .btn-tech-blue {
+            background-color: var(--tech-blue);
+            color: white;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-tech-blue:hover {
+            background-color: #0bb5d8;
+            color: white;
+            box-shadow: 0 4px 12px rgba(13, 202, 240, 0.3);
+        }
+
+        .form-control,
+        .form-select {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--light-green);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--secondary-green);
+            box-shadow: 0 0 0 0.25rem rgba(74, 157, 95, 0.25);
+        }
+
+        /* Toggle Buttons */
+        .toggle-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid var(--light-green);
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .toggle-btn:hover {
+            background: #f8f9fa;
+        }
+
+        .toggle-btn.active {
+            background: var(--secondary-green);
+            color: white;
+            border-color: var(--secondary-green);
+            box-shadow: 0 4px 12px rgba(74, 157, 95, 0.3);
+        }
+
+        /* Number Inputs with Units */
+        .input-with-unit {
+            position: relative;
+        }
+
+        .input-unit {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+            pointer-events: none;
+        }
+
+        .input-with-unit input {
+            padding-right: 70px;
+        }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--secondary-green) 0%, var(--primary-green) 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(45, 102, 53, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .btn-primary-custom:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 102, 53, 0.4);
+        }
+
+        .btn-primary-custom:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary-custom {
+            background: #e0e0e0;
+            color: #666;
+            border: none;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #d0d0d0;
+        }
+
+        /* Result Card */
+        .result-card {
+            background: linear-gradient(135deg, var(--secondary-green) 0%, var(--primary-green) 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            display: none;
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        .result-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* Top Prediction Box */
+        .top-prediction-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .prediction-badge {
+            background: var(--accent-gold);
+            color: var(--dark-text);
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Winner Container - Side by Side Layout */
+        .winner-container {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .winner-image-box {
+            flex-shrink: 0;
+        }
+
+        .crop-image-large {
+            width: 150px;
+            height: 150px;
+            border-radius: 15px;
+            object-fit: cover;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .crop-image-large:hover {
+            transform: scale(1.05);
+        }
+
+        .winner-details {
+            flex: 1;
+            min-width: 200px;
+            text-align: left;
+        }
+
+        .result-crop {
+            font-size: 3rem;
+            font-weight: 700;
+            text-transform: capitalize;
+            margin: 1rem 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Confidence Bar */
+        .confidence-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 1rem 0 0.5rem 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-gold) 0%, #ffeb3b 100%);
+            border-radius: 10px;
+            transition: width 0.6s ease-out;
+        }
+
+        .confidence-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            opacity: 0.95;
+        }
+
+        /* Alternatives Section */
+        .alternatives-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .alternatives-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .alternatives-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .alternative-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: center;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .alternative-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .crop-image-small {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 0.5rem;
+        }
+
+        .alt-rank {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin: 0 auto;
+        }
+
+        .alt-crop {
+            font-size: 1.3rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .alt-confidence {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        /* Soil Summary */
+        .soil-summary {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+        }
+
+        .soil-params {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: center;
+        }
+
+        .soil-param-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .crop-icon {
+            font-size: 5rem;
+            margin: 1rem 0;
+            animation: rotateIn 0.6s ease-out;
+        }
+
+        /* Alert */
+        .alert-custom {
+            border-radius: 15px;
+            border: none;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Loading Spinner */
+        .spinner-border-custom {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-width: 0.2rem;
+        }
+
+        /* Hidden Steps */
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Animations */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes rotateIn {
+            from {
+                transform: rotate(-180deg) scale(0.5);
+                opacity: 0;
+            }
+
+            to {
+                transform: rotate(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container-main {
+                padding: 0 1rem;
+            }
+
+            .glass-card {
+                padding: 1.5rem;
+            }
+
+            .card-title {
+                font-size: 1.5rem;
+            }
+
+            .result-crop {
+                font-size: 2rem;
+            }
+
+            .toggle-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="container">
+            <div class="row w-100 align-items-center">
+                <div class="col d-flex flex-column flex-md-row align-items-center">
+                    <a class="navbar-brand mb-0" href="#">
+                        <img src="{{ url_for('static', filename='img/agrisense_logo.png') }}" alt="AgriSense Logo"
+                            height="40" class="me-2">
+                        AgriSense
+                        <span class="brand-tagline">Smart Farming Assistant</span>
+                    </a>
+                </div>
+                <div class="col-auto">
+                    <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">
+                        <i class="fas fa-language"></i>
+                        <span id="langLabel">🇮🇳 हिंदी</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-main">
+        <!-- Main Card -->
+        <div class="glass-card">
+            <h2 class="card-title">
+                <i class="fas fa-seedling"></i>
+                <span data-en="Crop Recommendation System" data-hi="फसल अनुशंसा प्रणाली">
+                    Crop Recommendation System
+                </span>
+            </h2>
+
+            <!-- Alert Container -->
+            <div id="alertContainer"></div>
+
+            <!-- Step 2: Farm Details with Soil Report Mode -->
+            <div class="step active" id="step2">
+                <!-- Soil Health Card Question -->
+                <div class="form-group">
+                    <label class="form-label-large">
+                        <i class="fas fa-file-medical-alt"></i>
+                        <span data-en="📄 Do you have a Soil Health Card / Lab Report?"
+                            data-hi="📄 क्या आपके पास मृदा स्वास्थ्य कार्ड / प्रयोगशाला रिपोर्ट है?">
+                            📄 Do you have a Soil Health Card / Lab Report?
+                        </span>
+                    </label>
+                    <div class="toggle-group">
+                        <button class="toggle-btn" id="soilCardYes" onclick="selectSoilCard(true)">
+                            <i class="fas fa-check-circle"></i>
+                            <span data-en="Yes, I have it" data-hi="हां, मेरे पास है">Yes, I have it</span>
+                        </button>
+                        <button class="toggle-btn active" id="soilCardNo" onclick="selectSoilCard(false)">
+                            <i class="fas fa-times-circle"></i>
+                            <span data-en="No, I don't" data-hi="नहीं, मेरे पास नहीं है">No, I don't</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Questionnaire Section (Shown if "No" is selected - DEFAULT) -->
+                <div id="questionnaireSection">
+                    <div class="form-group">
+                        <label class="form-label-large">
+                            🌱 <span data-en="What type of soil do you have?"
+                                data-hi="आपके पास किस प्रकार की मिट्टी है?">
+                                What type of soil do you have?
+                            </span>
+                        </label>
+                        <select class="form-select" id="soilTypeSelect">
+                            <option value="" data-en="-- Select --" data-hi="-- चुनें --">-- Select --</option>
+                            <option value="Black Soil" data-en="Black Soil" data-hi="काली मिट्टी">Black Soil</option>
+                            <option value="Red Soil" data-en="Red Soil" data-hi="लाल मिट्टी">Red Soil</option>
+                            <option value="Sandy Soil" data-en="Sandy Soil" data-hi="रेतीली मिट्टी">Sandy Soil</option>
+                            <option value="Clay Soil" data-en="Clay Soil" data-hi="चिकनी मिट्टी">Clay Soil</option>
+                            <option value="Loamy Soil" data-en="Loamy Soil" data-hi="दोमट मिट्टी">Loamy Soil</option>
+                            <option value="I don't know" data-en="I don't know" data-hi="मुझे नहीं पता">I don't know
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label-large">
+                            💧 <span data-en="How is the water availability?" data-hi="पानी की उपलब्धता कैसी है?">
+                                How is the water availability?
+                            </span>
+                        </label>
+                        <select class="form-select" id="waterSelect">
+                            <option value="" data-en="-- Select --" data-hi="-- चुनें --">-- Select --</option>
+                            <option value="High Rainfall" data-en="High Rainfall" data-hi="अधिक बारिश">High Rainfall
+                            </option>
+                            <option value="Moderate / Canal Irrigation" data-en="Moderate / Canal Irrigation"
+                                data-hi="मध्यम / नहर सिंचाई">Moderate / Canal Irrigation</option>
+                            <option value="Low Rain / Borewell" data-en="Low Rain / Borewell"
+                                data-hi="कम बारिश / बोरवेल">Low Rain / Borewell</option>
+                            <option value="Dry / Scarcity" data-en="Dry / Scarcity" data-hi="सूखा / कमी">Dry / Scarcity
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label-large">
+                            🌦️ <span data-en="Which season is it?" data-hi="कौन सा मौसम है?">
+                                Which season is it?
+                            </span>
+                        </label>
+                        <select class="form-select" id="seasonSelect">
+                            <option value="" data-en="-- Select --" data-hi="-- चुनें --">-- Select --</option>
+                            <option value="Kharif (Monsoon)" data-en="Kharif (Monsoon)" data-hi="खरीफ (मानसून)">Kharif
+                                (Monsoon)</option>
+                            <option value="Rabi (Winter)" data-en="Rabi (Winter)" data-hi="रबी (सर्दी)">Rabi (Winter)
+                            </option>
+                            <option value="Zaid (Summer)" data-en="Zaid (Summer)" data-hi="जायद (गर्मी)">Zaid (Summer)
+                            </option>
+                            <option value="Year-round" data-en="Year-round" data-hi="साल भर">Year-round</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label-large">
+                            💊 <span data-en="What fertilizers did you use last?"
+                                data-hi="आपने पिछली बार कौन सी खाद का उपयोग किया?">
+                                What fertilizers did you use last?
+                            </span>
+                        </label>
+                        <select class="form-select" id="fertilizerSelect">
+                            <option value="" data-en="-- Select --" data-hi="-- चुनें --">-- Select --</option>
+                            <option value="Urea">Urea</option>
+                            <option value="DAP">DAP</option>
+                            <option value="NPK">NPK</option>
+                            <option value="Organic / Cow Dung" data-en="Organic / Cow Dung" data-hi="जैविक / गोबर">
+                                Organic / Cow Dung</option>
+                            <option value="None" data-en="None" data-hi="कोई नहीं">None</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label-large">
+                            🌡️ <span data-en="How does the temperature feel?" data-hi="तापमान कैसा लगता है?">
+                                How does the temperature feel?
+                            </span>
+                        </label>
+
+                        <!-- Auto-Temp Display -->
+                        <div id="autoTempDisplay" style="display: none;"
+                            class="alert alert-light border d-flex justify-content-between align-items-center p-2 mb-2">
+                            <div>
+                                🌡️ Temperature: <strong><span id="autoTempVal"></span>°C</strong> <span
+                                    class="badge bg-success ms-1">Auto-detected</span>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="toggleTempEdit()">✏️
+                                Edit</button>
+                        </div>
+
+                        <!-- Manual Dropdown -->
+                        <div id="manualTempInput">
+                            <select class="form-select" id="temperatureSelect">
+                                <option value="" data-en="-- Select --" data-hi="-- चुनें --">-- Select --</option>
+                                <option value="Hot (30°C+)" data-en="Hot (30°C+)" data-hi="गर्म (30°C+)">Hot (30°C+)
+                                </option>
+                                <option value="Moderate (20-30°C)" data-en="Moderate (20-30°C)"
+                                    data-hi="मध्यम (20-30°C)">
+                                    Moderate (20-30°C)</option>
+                                <option value="Cold (<20°C)" data-en="Cold (<20°C)" data-hi="ठंडा (<20°C)">Cold
+                                    (&lt;20°C)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual Entry Section (Known IDs) -->
+                <div id="manualEntrySection" style="display: none;">
+                    <p class="form-label-large" data-en="Enter your soil and climate parameters:"
+                        data-hi="अपने मिट्टी और जलवायु के पैरामीटर दर्ज करें:">
+                        Enter your soil and climate parameters:
+                    </p>
+
+                    <div class="form-group">
+                        <label class="form-label">Nitrogen (N) - kg/ha</label>
+                        <div class="input-with-unit">
+                            <input type="number" class="form-control" id="nitrogen" min="0" max="140" step="0.1"
+                                placeholder="0-140" required>
+                            <span class="input-unit">kg/ha</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phosphorus (P) - kg/ha</label>
+                        <div class="input-with-unit">
+                            <input type="number" class="form-control" id="phosphorus" min="5" max="145" step="0.1"
+                                placeholder="5-145" required>
+                            <span class="input-unit">kg/ha</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Potassium (K) - kg/ha</label>
+                        <div class="input-with-unit">
+                            <input type="number" class="form-control" id="potassium" min="5" max="205" step="0.1"
+                                placeholder="5-205" required>
+                            <span class="input-unit">kg/ha</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Soil pH</label>
+                        <input type="number" class="form-control" id="ph" min="3.5" max="9.5" step="0.1"
+                            placeholder="3.5-9.5" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Temperature (°C)</label>
+                        <div class="input-with-unit">
+                            <input type="number" class="form-control" id="temperature" min="10" max="50" step="0.1"
+                                placeholder="10-50" required>
+                            <span class="input-unit">°C</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Humidity (%)</label>
+                        <div class="input-with-unit">
+                            <input type="number" class="form-control" id="humidity" min="15" max="100" step="0.1"
+                                placeholder="15-100" required>
+                            <span class="input-unit">%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rainfall (cm/year)</label>
+                        <div class="input-with-unit">
+                            <input type="number" class="form-control" id="rainfall" min="20" max="300" step="0.1"
+                                placeholder="20-300" required>
+                            <span class="input-unit">cm/year</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn-secondary-custom" onclick="goToStep1()">
+                        <i class="fas fa-arrow-left"></i>
+                        <span data-en="Back" data-hi="पीछे">Back</span>
+                    </button>
+
+                    <!-- Analyze Farm Button (Shown when "No" selected - calls /estimate API) -->
+                    <button type="button" class="btn-primary-custom flex-fill" id="analyzeFarmBtn"
+                        onclick="analyzeFarm()">
+                        <i class="fas fa-magic"></i>
+                        <span data-en="Analyze Farm" data-hi="खेत का विश्लेषण करें">Analyze Farm</span>
+                        <span class="spinner-border spinner-border-custom ms-2 d-none" id="analyzeSpinner"></span>
+                    </button>
+
+                    <!-- Get Recommendation Button -->
+                    <button type="button" class="btn-primary-custom flex-fill" id="btn-predict" style="display: none;">
+                        <i class="fas fa-chart-line"></i>
+                        <span data-en="Get Crop Recommendation" data-hi="फसल सिफारिश प्राप्त करें">Get Crop
+                            Recommendation</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Card - Top 3 Predictions with Images -->
+        <div class="result-card" id="resultCard">
+            <i class="fas fa-leaf crop-icon"></i>
+            <h3 data-en="🎯 Top Crop Recommendations" data-hi="🎯 शीर्ष फसल सिफारिशें">🎯 Top Crop Recommendations</h3>
+
+            <!-- Top Prediction - Side by Side Layout -->
+            <div class="top-prediction-box">
+                <div class="prediction-badge" data-en="Best Match" data-hi="सर्वोत्तम मिलान">Best Match</div>
+                <div class="winner-group d-flex flex-column flex-md-row align-items-center gap-4">
+                    <div class="winner-image-box flex-shrink-0">
+                        <img id="topCropImage" src="/static/img/crops/default.jpg" alt="Crop Image"
+                            class="crop-image-large shadow-lg rounded-4"
+                            style="width: 200px; height: 200px; object-fit: cover;">
+                    </div>
+                    <div class="winner-details flex-grow-1 text-center text-md-start">
+                        <h2 class="result-crop fw-bold text-success mb-2" id="topCrop" style="font-size: 2.5rem;">Rice
+                        </h2>
+
+                        <div class="confidence-container mb-3">
+                            <div class="confidence-bar rounded-pill bg-light border"
+                                style="height: 12px; max-width: 300px;">
+                                <div class="confidence-fill bg-success rounded-pill" id="topConfidenceFill"
+                                    style="width: 85%; height: 100%;"></div>
+                            </div>
+                            <small class="confidence-text text-muted fw-bold" id="topConfidence">85% confidence</small>
+                        </div>
+
+                        <!-- PRIMARY ACTION BUTTON -->
+                        <div id="reportButtonInline" style="display: none;">
+                            <!-- Analysis Button -->
+                            <a href="/report/${currentPredictionId}" target="_blank"
+                                class="btn btn-tech-blue w-100 rounded-pill py-2 shadow-sm fw-bold">
+                                <i class="fas fa-file-alt me-2"></i> View Detailed Report
+                            </a>
+
+                            <!-- VOICE OUTPUT BUTTON -->
+                            <button class="btn btn-outline-dark btn-lg rounded-pill ms-2 mt-2 px-4 py-3 fw-bold"
+                                onclick="speakResult()">
+                                🔊 Listen / सुनें
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extra styles removed -->
+
+            <!-- Alternative Recommendations - Vertical Cards -->
+            <div class="alternatives-section" id="alternativesSection">
+                <h4 class="alternatives-title" data-en="Alternative Options:" data-hi="वैकल्पिक विकल्प:">Alternative
+                    Options:</h4>
+                <div class="alternatives-grid">
+                    <div class="alternative-item">
+                        <img id="alt1Image" src="/static/img/crops/default.jpg" alt="Alternative 1"
+                            class="crop-image-small">
+                        <div class="alt-rank">2</div>
+                        <div class="alt-crop" id="alt1Crop">Wheat</div>
+                        <div class="alt-confidence" id="alt1Confidence">12%</div>
+                    </div>
+                    <div class="alternative-item">
+                        <img id="alt2Image" src="/static/img/crops/default.jpg" alt="Alternative 2"
+                            class="crop-image-small">
+                        <div class="alt-rank">3</div>
+                        <div class="alt-crop" id="alt2Crop">Maize</div>
+                        <div class="alt-confidence" id="alt2Confidence">8%</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Soil Data Summary -->
+        <div class="soil-summary" id="soilSummary" style="display: none;">
+            <p class="summary-title" data-en="📊 Based on your soil conditions:"
+                data-hi="📊 आपकी मिट्टी की स्थिति के आधार पर:">
+                📊 Based on your soil conditions:
+            </p>
+            <div class="soil-params" id="soilParams"></div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Current language state (from Flask template)
+        let currentLang = '{{ language }}';
+        let hasSoilCard = null;
+        // Store city from onboarding (passed from Flask session)
+        const userCity = '{{ session.get("city", "") }}';
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. Language Init
+            if (typeof updateLanguageToggleLabel === 'function') updateLanguageToggleLabel();
+            if (currentLang === 'hi') applyLanguage('hi');
+
+            // 2. Restore session
+            const storedName = localStorage.getItem('farmerName');
+            const storedCity = localStorage.getItem('farmerCity');
+
+            if (storedName && storedCity) {
+                userSession.name = storedName;
+                userCity = storedCity;
+                // Update UI...
+                document.getElementById('nameInputSection').classList.add('d-none');
+                document.getElementById('manualEntrySection').classList.remove('d-none'); // Or flow logic
+                // For simplicity, we stick to onboarding flow in HTML structure
+            }
+
+            // --- AUTO-WEATHER INIT ---
+            initWeatherAutoFill();
+
+            // --- NEW: EVENT LISTENER FOR PREDICT BUTTON ---
+
+            // --- NEW REFACTORED EVENT LISTENER ---
+            const btnPredict = document.getElementById('btn-predict');
+            if (btnPredict) {
+                console.log("✅ Button found. Listener attached.");
+                btnPredict.addEventListener('click', function (e) {
+                    e.preventDefault(); // Stop any form submission
+                    console.log("🖱️ Button Clicked!");
+
+                    // 1. Gather Data (Using New IDs)
+                    const N = document.getElementById('nitrogen').value;
+                    const P = document.getElementById('phosphorus').value;
+                    const K = document.getElementById('potassium').value;
+                    const ph = document.getElementById('ph').value;
+                    const rainfall = document.getElementById('rainfall').value;
+                    const temperature = document.getElementById('temperature').value;
+                    const humidity = document.getElementById('humidity').value;
+                    const city = document.getElementById('farmer_city') ? document.getElementById('farmer_city').value : "Unknown";
+
+                    const formData = {
+                        N, P, K, ph, rainfall, temperature, humidity, city,
+                        language: (typeof currentLang !== 'undefined') ? currentLang : 'en'
+                    };
+
+                    console.log("📊 Sending Data:", formData);
+
+                    // 2. Validation
+                    if (!N || !P || !K || !ph || !temperature || !humidity || !rainfall) {
+                        showAlert('warning',
+                            currentLang === 'hi' ? 'कृपया सभी फ़ील्ड भरें' : 'Please fill all fields'
+                        );
+                        return;
+                    }
+
+                    // 3. Show Loading State
+                    const originalText = btnPredict.innerHTML;
+                    btnPredict.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Analyzing...';
+                    btnPredict.disabled = true;
+
+                    // 4. Send to API
+                    fetch('/predict', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log("📩 Response received:", data);
+                            if (data.success) {
+                                showResult(data);
+                            } else {
+                                const error = (data.error && data.error[currentLang === 'hi' ? 'hi' : 'en']) || data.error || 'Unknown Error';
+                                showAlert('danger', error);
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Fetch Error:", error);
+                            showAlert('danger', 'Error: ' + error.message);
+                        })
+                        .finally(() => {
+                            btnPredict.innerHTML = originalText;
+                            btnPredict.disabled = false;
+                        });
+                });
+            } else {
+                console.error("CRITICAL ERROR: Button with id 'btn-predict' not found!");
+            }
+        });
+
+        // Language toggle function
+        function toggleLanguage() {
+            currentLang = (currentLang === 'en') ? 'hi' : 'en';
+            applyLanguage(currentLang);
+        }
+
+        function applyLanguage(lang) {
+            // Update all elements with data-en and data-hi attributes
+            document.querySelectorAll('[data-en][data-hi]').forEach(el => {
+                const enText = el.getAttribute('data-en');
+                const hiText = el.getAttribute('data-hi');
+
+                if (el.tagName === 'OPTION') {
+                    el.textContent = lang === 'en' ? enText : hiText;
+                } else {
+                    el.textContent = lang === 'en' ? enText : hiText;
+                }
+            });
+
+            // Update placeholders
+            document.querySelectorAll('[data-placeholder-en][data-placeholder-hi]').forEach(el => {
+                el.placeholder = el.getAttribute('data-placeholder-' + lang);
+            });
+
+            updateLanguageToggleLabel();
+        }
+
+        function updateLanguageToggleLabel() {
+            const label = document.getElementById('langLabel');
+            if (currentLang === 'en') {
+                label.innerHTML = '🇮🇳 हिंदी';
+            } else {
+                label.innerHTML = '🇬🇧 English';
+            }
+        }
+
+        // Soil Health Card Selection (in Step 2)
+        function selectSoilCard(hasCard) {
+            hasSoilCard = hasCard;
+
+            document.getElementById('soilCardYes').classList.toggle('active', hasCard);
+            document.getElementById('soilCardNo').classList.toggle('active', !hasCard);
+
+            if (hasCard) {
+                // Show manual entry inputs, hide questionnaire
+                document.getElementById('manualEntrySection').style.display = 'block';
+                document.getElementById('questionnaireSection').style.display = 'none';
+
+                // Show manual predict button, hide analyze farm button
+                document.getElementById('btn-predict').style.display = 'block'; // Changed from manualPredictBtn
+                document.getElementById('analyzeFarmBtn').style.display = 'none';
+            } else {
+                // Show questionnaire, hide manual entry inputs
+                document.getElementById('manualEntrySection').style.display = 'none';
+                document.getElementById('questionnaireSection').style.display = 'block';
+
+                // Show analyze farm button, hide manual predict button
+                document.getElementById('btn-predict').style.display = 'none'; // Changed from manualPredictBtn
+                document.getElementById('analyzeFarmBtn').style.display = 'block';
+            }
+        }
+
+        // Note: Step navigation removed - we start directly at Step 2 (Farm Information)
+        // since city/village is already collected during onboarding
+
+        // Analyze Farm (Questionnaire → /estimate API → /predict)
+        async function analyzeFarm() {
+            const soilType = document.getElementById('soilTypeSelect').value;
+            const water = document.getElementById('waterSelect').value;
+            const season = document.getElementById('seasonSelect').value;
+            const fertilizer = document.getElementById('fertilizerSelect').value;
+            const temperature = document.getElementById('temperatureSelect').value;
+
+            // Validation
+            // Relaxed validation: If Auto-Temp Display is visible, we assume temperature is valid (derived from weather)
+            const isAutoTempVisible = document.getElementById('autoTempDisplay') && document.getElementById('autoTempDisplay').style.display !== 'none';
+
+            // Check essential fields
+            if (!soilType || !water || !season || !fertilizer) {
+                showAlert('warning',
+                    currentLang === 'en' ? 'Please answer all questions' : 'कृपया सभी प्रश्नों के उत्तर दें'
+                );
+                return;
+            }
+
+            // Check Temperature only if NOT in auto mode
+            if (!temperature && !isAutoTempVisible) {
+                showAlert('warning',
+                    currentLang === 'en' ? 'Please answer usage/temperature' : 'कृपया तापमान चुनें'
+                );
+                return;
+            }
+
+            const spinner = document.getElementById('analyzeSpinner');
+            spinner.classList.remove('d-none');
+
+            try {
+                // Call /estimate API to get parameters from questionnaire
+                const estimateResponse = await fetch('/estimate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: userCity,  // Use city from onboarding session
+                        soil_type: soilType,
+                        water_availability: water,
+                        season: season,
+                        fertilizer_usage: fertilizer,
+                        temperature: temperature
+                    })
+                });
+
+                const estimateResult = await estimateResponse.json();
+
+                if (!estimateResult.success) {
+                    const error = estimateResult.error[currentLang] || estimateResult.error.en || estimateResult.error;
+                    showAlert('danger', error);
+                    return;
+                }
+
+                const p = estimateResult.data; // Assuming estimateResult.data contains the parameters
+                if (p) {
+                    // Populate inputs (NEW IDs)
+                    document.getElementById('nitrogen').value = p.N;
+                    document.getElementById('phosphorus').value = p.P;
+                    document.getElementById('potassium').value = p.K;
+                    document.getElementById('ph').value = p.ph;
+                    document.getElementById('rainfall').value = p.rainfall;
+
+                    const tempInput = document.getElementById('temperature');
+                    const humInput = document.getElementById('humidity');
+                    tempInput.value = p.temperature;
+                    humInput.value = p.humidity;
+
+                    // Add Badges Function
+                    const addBadge = (inputEl, type) => {
+                        const labelGroup = inputEl.closest('.form-group');
+                        const label = labelGroup.querySelector('label');
+                        // Remove old badges
+                        label.querySelectorAll('.start-badge').forEach(e => e.remove());
+
+                        const badge = document.createElement('span');
+                        badge.className = 'badge ms-2 start-badge ' + (type === 'live' ? 'bg-success' : 'bg-warning text-dark');
+                        badge.innerHTML = type === 'live' ? 'LIVE 🟢' : 'AI Est. 🤖';
+                        label.appendChild(badge);
+                    };
+
+                    const source = p.weather_source || 'ai';
+                    addBadge(tempInput, source);
+                    addBadge(humInput, source);
+                }
+
+                // Then call /predict using those parameters
+                const predictResponse = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...p,
+                        language: currentLang
+                    })
+                });
+
+                const predictResult = await predictResponse.json();
+
+                if (predictResult.success) {
+                    showResult(predictResult);  // Pass entire result object
+                } else {
+                    const error = predictResult.error[currentLang] || predictResult.error.en || predictResult.error;
+                    showAlert('danger', error);
+                }
+            } catch (error) {
+                showAlert('danger', 'Error: ' + error.message);
+            } finally {
+                spinner.classList.add('d-none');
+            }
+        }
+
+        // Submit Manual Prediction (Direct /predict, NO /estimate API call)
+        // This function is now redundant as btn-predict handles both cases based on visible inputs.
+        // Keeping it commented out for reference if needed, but the new event listener for btn-predict
+        // will take over this functionality.
+        /*
+        async function submitManualPrediction() {
+            const N = parseFloat(document.getElementById('nitrogen').value);
+            const P = parseFloat(document.getElementById('phosphorus').value);
+            const K = parseFloat(document.getElementById('potassium').value);
+            const ph = parseFloat(document.getElementById('ph').value);
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const humidity = parseFloat(document.getElementById('humidity').value);
+            const rainfall = parseFloat(document.getElementById('rainfall').value);
+
+            // Validation
+            const selectedLang = (typeof currentLang !== 'undefined') ? currentLang : 'en'; // Safe access
+
+            if (isNaN(N) || isNaN(P) || isNaN(K) || isNaN(ph) ||
+                isNaN(temperature) || isNaN(humidity) || isNaN(rainfall)) {
+                showAlert('warning',
+                    selectedLang === 'en' ? 'Please fill all fields with valid numbers' : 'कृपया सभी फ़ील्ड मान्य संख्याओं के साथ भरें'
+                );
+                return;
+            }
+
+            const spinner = document.getElementById('manualSpinner'); // This spinner ID is removed from HTML
+            if (spinner) spinner.classList.remove('d-none');
+
+            try {
+                // Direct prediction with user-provided values (NO API estimation)
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        N, P, K, temperature, humidity, ph, rainfall, language: selectedLang
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showResult(result);  // Pass entire result object
+                } else {
+                    const error = result.error[selectedLang] || result.error.en || result.error;
+                    showAlert('danger', error);
+                }
+            } catch (error) {
+                console.error("Manual Prediction Error:", error);
+                showAlert('danger', 'Error: ' + error.message);
+            } finally {
+                if (spinner) spinner.classList.add('d-none');
+            }
+        }
+        */
+
+        // REMOVED OLD submitQuestionnaire function - replaced by analyzeFarm
+
+        // Helper function to get crop image path
+        function getCropImagePath(cropName) {
+            // Convert crop name to lowercase and replace spaces with underscores
+            const imageName = cropName.toLowerCase().replace(/\s+/g, '_');
+            return `/static/img/crops/${imageName}.jpg`;
+        }
+
+        // Show result card with top 3 predictions and images
+        function showResult(data) {
+            const resultCard = document.getElementById('resultCard');
+
+            // Handle both old format (single crop) and new format (top 3)
+            if (data.top_prediction) {
+                // New format with top 3
+                const topPred = data.top_prediction;
+                const alternatives = data.alternatives || [];
+                const soilData = data.soil_data;
+
+                // Update top prediction
+                document.getElementById('topCrop').textContent = topPred.crop;
+                document.getElementById('topConfidence').textContent = topPred.confidence + '% confidence';
+                document.getElementById('topConfidenceFill').style.width = topPred.confidence + '%';
+
+                // Update top crop image
+                const topImage = document.getElementById('topCropImage');
+                topImage.src = getCropImagePath(topPred.crop_en || topPred.crop);
+                topImage.alt = topPred.crop;
+                topImage.onerror = function () {
+                    this.src = '/static/img/crops/default.jpg';
+                };
+
+                // FORCE SHOW INLINE REPORT BUTTON
+                console.log("Prediction ID:", data.prediction_id);
+                if (data.prediction_id) {
+                    const reportLink = document.querySelector('#reportButtonInline a'); // Select the anchor tag inside the div
+                    const reportButtonInline = document.getElementById('reportButtonInline');
+
+                    reportLink.href = `/report/${data.prediction_id}`;
+                    reportButtonInline.style.display = 'block';
+
+                    console.log('✅ INLINE BUTTON SHOWN! URL:', reportLink.href);
+                } else {
+                    console.warn('⚠️ NO prediction_id - button hidden');
+                }
+
+                // Update alternatives
+                if (alternatives.length >= 1) {
+                    document.getElementById('alt1Crop').textContent = alternatives[0].crop;
+                    document.getElementById('alt1Confidence').textContent = alternatives[0].confidence + '%';
+
+                    // Update alt1 image
+                    const alt1Image = document.getElementById('alt1Image');
+                    alt1Image.src = getCropImagePath(alternatives[0].crop_en || alternatives[0].crop);
+                    alt1Image.alt = alternatives[0].crop;
+                    alt1Image.onerror = function () {
+                        this.src = '/static/img/crops/default.jpg';
+                    };
+                }
+                if (alternatives.length >= 2) {
+                    document.getElementById('alt2Crop').textContent = alternatives[1].crop;
+                    document.getElementById('alt2Confidence').textContent = alternatives[1].confidence + '%';
+
+                    // Update alt2 image
+                    const alt2Image = document.getElementById('alt2Image');
+                    alt2Image.src = getCropImagePath(alternatives[1].crop_en || alternatives[1].crop);
+                    alt2Image.alt = alternatives[1].crop;
+                    alt2Image.onerror = function () {
+                        this.src = '/static/img/crops/default.jpg';
+                    };
+                }
+
+                // Show/hide alternatives section
+                document.getElementById('alternativesSection').style.display =
+                    alternatives.length > 0 ? 'block' : 'none';
+
+                // Update Advanced Analysis section
+                if (topPred.analysis) {
+                    // Advanced analysis is now shown on the detailed report page
+                }
+                if (soilData) {
+                    const soilParamsDiv = document.getElementById('soilParams');
+                    const wSrc = soilData.weather_source || 'ai';
+                    const wBadge = wSrc === 'live' ?
+                        '<span class="badge bg-success ms-1" style="font-size: 0.6em;">LIVE</span>' :
+                        '<span class="badge bg-warning text-dark ms-1" style="font-size: 0.6em;">AI</span>';
+
+                    soilParamsDiv.innerHTML = `
+                        <div class="soil-param-item">N: ${soilData.N} kg/ha</div>
+                        <div class="soil-param-item">P: ${soilData.P} kg/ha</div>
+                        <div class="soil-param-item">K: ${soilData.K} kg/ha</div>
+                        <div class="soil-param-item">pH: ${soilData.ph}</div>
+                        <div class="soil-param-item">Temp: ${soilData.temperature}°C ${wBadge}</div>
+                        <div class="soil-param-item">Humidity: ${soilData.humidity}% ${wBadge}</div>
+                        <div class="soil-param-item">Rainfall: ${soilData.rainfall} cm/yr</div>
+                    `;
+                    document.getElementById('soilSummary').style.display = 'block';
+                }
+            } else {
+                // Old format - single crop (backward compatibility)
+                document.getElementById('topCrop').textContent = data;
+                document.getElementById('topConfidence').textContent = 'High confidence';
+                document.getElementById('topConfidenceFill').style.width = '90%';
+
+                // Set default image for old format
+                const topImage = document.getElementById('topCropImage');
+                topImage.src = getCropImagePath(data);
+                topImage.alt = data;
+                topImage.onerror = function () {
+                    this.src = '/static/img/crops/default.jpg';
+                };
+
+                document.getElementById('alternativesSection').style.display = 'none';
+                document.getElementById('soilSummary').style.display = 'none';
+            }
+
+            resultCard.classList.add('show');
+
+
+            // Mega button logic removed - kept inline button only
+
+            // Scroll to result
+            resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Show alert message
+        function showAlert(type, message) {
+            const alertDiv = document.getElementById('alertContainer');
+            alertDiv.innerHTML = `
+                <div class="alert alert-${type} alert-custom alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+
+        // Voice Output Logic
+        function speakResult() {
+            if (!('speechSynthesis' in window)) {
+                alert('Text-to-speech not supported.');
+                return;
+            }
+
+            // Get data
+            const cropName = document.getElementById('topCrop').innerText;
+            const revenueText = document.querySelector('.highlight-stat .fs-2') ?
+                document.querySelector('.highlight-stat .fs-2').innerText :
+                (document.getElementById('ecoRevenue') ? document.getElementById('ecoRevenue').innerText : 'good profits');
+
+            // Attempt to get revenue from result object if available in scope, otherwise Generic
+            // Since we are on dashboard, let's construct generic message first
+
+            const isHindi = document.getElementById('langLabel').textContent.includes('English'); // Toggle logic invserse
+            // Actually check current lang state.
+            // On dashboard, langLabel shows the TARGET language to switch to. 
+            // If label is "English", current is Hindi. If label is "Hindi", current is English.
+            const currentLang = document.getElementById('langLabel').textContent.includes('English') ? 'hi' : 'en';
+
+            let text = "";
+            let langCode = 'en-US';
+
+            if (currentLang === 'hi') {
+                text = `आपके खेत के लिए ${cropName} सबसे अच्छा है। आप इससे अच्छा मुनाफा कमा सकते हैं।`;
+                langCode = 'hi-IN';
+            } else {
+                text = `The best crop for your farm is ${cropName}. It is highly recommended for your soil.`;
+                langCode = 'en-US';
+            }
+
+            // Cancel existing
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = langCode;
+
+            // Try to find a voice
+            const voices = window.speechSynthesis.getVoices();
+            if (langCode === 'hi-IN') {
+                const hiVoice = voices.find(v => v.lang.includes('hi'));
+                if (hiVoice) utterance.voice = hiVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- AUTO-WEATHER ON LOAD ---
+        window.toggleTempEdit = function () {
+            document.getElementById('autoTempDisplay').style.display = 'none';
+            document.getElementById('manualTempInput').style.display = 'block';
+        };
+
+        async function initWeatherAutoFill() {
+            if (!userCity) return;
+            try {
+                const res = await fetch(`/weather?city=${encodeURIComponent(userCity)}`);
+                const result = await res.json();
+
+                if (result.success && result.data) {
+                    const w = result.data;
+                    console.log("Weather Auto-Fill:", w);
+
+                    if (w) {
+                        // 1. Fill Manual Inputs (NEW IDs)
+                        const tInput = document.getElementById('temperature');
+                        const hInput = document.getElementById('humidity');
+
+                        if (tInput) tInput.value = w.temp;
+                        if (hInput) hInput.value = w.humidity;
+
+                        // 2. Auto-Select Questionnaire Dropdown
+                        const tSelect = document.getElementById('temperatureSelect');
+                        if (tSelect) {
+                            let keyword = "";
+                            if (w.temp >= 30) keyword = "Hot";
+                            else if (w.temp >= 20) keyword = "Moderate";
+                            else keyword = "Cold";
+
+                            for (let i = 0; i < tSelect.options.length; i++) {
+                                if (tSelect.options[i].value.includes(keyword)) {
+                                    tSelect.selectedIndex = i;
+                                    break;
+                                }
+                            }
+
+                            // Show Display, Hide Dropdown (UI Polish)
+                            const autoVal = document.getElementById('autoTempVal');
+                            if (autoVal) autoVal.textContent = w.temp;
+
+                            const autoDisp = document.getElementById('autoTempDisplay');
+                            if (autoDisp) autoDisp.style.display = 'flex';
+
+                            const manInp = document.getElementById('manualTempInput');
+                            if (manInp) manInp.style.display = 'none';
+                        }
+
+                        // Use showAlert if available
+                        if (typeof showAlert === 'function') {
+                            showAlert('success', `Live Weather Found for ${userCity}: ${w.temp}°C, ${w.humidity}%`);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Auto-weather error:", e);
+            }
+        }
+
+        initWeatherAutoFill();
+    </script>
+</body>
+
+</html>

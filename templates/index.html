@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Crop Recommendation System | AI-Powered Farming</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-green: #2d6635;
+            --secondary-green: #4a9d5f;
+            --light-green: #7bc47f;
+            --accent-gold: #f4a261;
+            --earth-brown: #8b6f47;
+            --sky-blue: #87ceeb;
+            --white: #ffffff;
+            --light-gray: #f8f9fa;
+            --dark-text: #2c3e50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 50%, #a5d6a7 100%);
+            min-height: 100vh;
+            color: var(--dark-text);
+        }
+        
+        /* Animated background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.05) 35px, rgba(255,255,255,.05) 70px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container-main {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 0.5rem;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: var(--earth-brown);
+            font-weight: 300;
+        }
+        
+        .header-icon {
+            font-size: 4rem;
+            color: var(--secondary-green);
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+        
+        /* Card Styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 2rem;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary-green);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .card-title i {
+            color: var(--secondary-green);
+        }
+        
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--dark-text);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .param-value {
+            background: var(--light-green);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .form-range {
+            height: 8px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--light-green) 0%, var(--secondary-green) 100%);
+        }
+        
+        .form-range::-webkit-slider-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-green);
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .form-range::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-green);
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        textarea.form-control {
+            border: 2px solid var(--light-green);
+            border-radius: 15px;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+        
+        textarea.form-control:focus {
+            border-color: var(--secondary-green);
+            box-shadow: 0 0 0 0.25rem rgba(74, 157, 95, 0.25);
+        }
+        
+        /* Buttons */
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--secondary-green) 0%, var(--primary-green) 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(45, 102, 53, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 102, 53, 0.4);
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+        }
+        
+        .btn-primary-custom:active {
+            transform: translateY(0);
+        }
+        
+        .btn-ai {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-ai:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Result Card */
+        .result-card {
+            background: linear-gradient(135deg, var(--secondary-green) 0%, var(--primary-green) 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            display: none;
+            animation: fadeInScale 0.5s ease-out;
+        }
+        
+        .result-card.show {
+            display: block;
+        }
+        
+        .result-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+        
+        .result-crop {
+            font-size: 3rem;
+            font-weight: 700;
+            text-transform: capitalize;
+            margin: 1rem 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .crop-icon {
+            font-size: 5rem;
+            margin: 1rem 0;
+            animation: rotateIn 0.6s ease-out;
+        }
+        
+        /* Alert Messages */
+        .alert-custom {
+            border-radius: 15px;
+            border: none;
+            padding: 1rem 1.5rem;
+            margin-top: 1rem;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        /* Loading Spinner */
+        .spinner-border-custom {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-width: 0.2rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        @keyframes rotateIn {
+            from {
+                transform: rotate(-180deg) scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: rotate(0) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header .subtitle {
+                font-size: 1rem;
+            }
+            
+            .glass-card {
+                padding: 1.5rem;
+            }
+            
+            .card-title {
+                font-size: 1.5rem;
+            }
+            
+            .result-crop {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-main">
+        <!-- Header -->
+        <div class="header">
+            <i class="fas fa-seedling header-icon"></i>
+            <h1>🌾 Smart Crop Recommendation System</h1>
+            <p class="subtitle">AI-Powered Agricultural Intelligence for Optimal Crop Selection</p>
+        </div>
+        
+        <div class="row">
+            <!-- Manual Input Section -->
+            <div class="col-lg-6">
+                <div class="glass-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-sliders-h"></i>
+                        Manual Input Panel
+                    </h2>
+                    
+                    <form id="manualForm">
+                        <!-- Nitrogen (N) -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span><i class="fas fa-flask"></i> Nitrogen (N)</span>
+                                <span class="param-value" id="nValue">0.50</span>
+                            </label>
+                            <input type="range" class="form-range" id="nInput" min="0" max="1" step="0.01" value="0.50">
+                        </div>
+                        
+                        <!-- Phosphorus (P) -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span><i class="fas fa-flask"></i> Phosphorus (P)</span>
+                                <span class="param-value" id="pValue">0.50</span>
+                            </label>
+                            <input type="range" class="form-range" id="pInput" min="0" max="1" step="0.01" value="0.50">
+                        </div>
+                        
+                        <!-- Potassium (K) -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span><i class="fas fa-flask"></i> Potassium (K)</span>
+                                <span class="param-value" id="kValue">0.50</span>
+                            </label>
+                            <input type="range" class="form-range" id="kInput" min="0" max="1" step="0.01" value="0.50">
+                        </div>
+                        
+                        <!-- Temperature -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span><i class="fas fa-temperature-high"></i> Temperature (°C)</span>
+                                <span class="param-value" id="tempValue">25</span>
+                            </label>
+                            <input type="range" class="form-range" id="tempInput" min="8" max="45" step="0.1" value="25">
+                        </div>
+                        
+                        <!-- Humidity -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span><i class="fas fa-tint"></i> Humidity (%)</span>
+                                <span class="param-value" id="humidityValue">50</span>
+                            </label>
+                            <input type="range" class="form-range" id="humidityInput" min="0" max="100" step="1" value="50">
+                        </div>
+                        
+                        <!-- pH -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span><i class="fas fa-vial"></i> Soil pH</span>
+                                <span class="param-value" id="phValue">6.5</span>
+                            </label>
+                            <input type="range" class="form-range" id="phInput" min="3" max="10" step="0.1" value="6.5">
+                        </div>
+                        
+                        <!-- Rainfall -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <span><i class="fas fa-cloud-rain"></i> Rainfall (mm)</span>
+                                <span class="param-value" id="rainfallValue">100</span>
+                            </label>
+                            <input type="range" class="form-range" id="rainfallInput" min="20" max="300" step="1" value="100">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary-custom w-100">
+                            <i class="fas fa-chart-line"></i>
+                            Predict Crop
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- AI Consultant Section -->
+            <div class="col-lg-6">
+                <div class="glass-card">
+                    <h2 class="card-title">
+                        <i class="fas fa-brain"></i>
+                        AI Consultant
+                    </h2>
+                    
+                    <p style="color: var(--earth-brown); margin-bottom: 1rem;">
+                        <i class="fas fa-info-circle"></i>
+                        Describe your farm conditions in natural language, and our AI will analyze and recommend the best crop!
+                    </p>
+                    
+                    <form id="aiForm">
+                        <div class="form-group">
+                            <textarea 
+                                class="form-control" 
+                                id="aiInput" 
+                                rows="6" 
+                                placeholder="Example: I live in Rajasthan, the weather is hot and dry with temperatures around 35°C. The soil is sandy with low nitrogen but decent potassium. We get about 60mm of rainfall annually, and the soil pH is around 7.5..."
+                                required
+                            ></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary-custom btn-ai w-100">
+                            <i class="fas fa-magic"></i>
+                            Analyze with AI
+                            <span class="spinner-border spinner-border-custom ms-2 d-none" id="aiSpinner"></span>
+                        </button>
+                        
+                        <div id="aiAlert"></div>
+                    </form>
+                </div>
+                
+                <!-- Result Card -->
+                <div class="result-card" id="resultCard">
+                    <i class="fas fa-leaf crop-icon"></i>
+                    <h3>Recommended Crop</h3>
+                    <div class="result-crop" id="resultCrop">Rice</div>
+                    <p style="opacity: 0.9; font-size: 0.95rem;">
+                        Based on the provided soil and weather parameters, this crop is most suitable for your conditions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Update slider values in real-time
+        const sliders = [
+            { input: 'nInput', value: 'nValue' },
+            { input: 'pInput', value: 'pValue' },
+            { input: 'kInput', value: 'kValue' },
+            { input: 'tempInput', value: 'tempValue' },
+            { input: 'humidityInput', value: 'humidityValue' },
+            { input: 'phInput', value: 'phValue' },
+            { input: 'rainfallInput', value: 'rainfallValue' }
+        ];
+        
+        sliders.forEach(slider => {
+            const inputEl = document.getElementById(slider.input);
+            const valueEl = document.getElementById(slider.value);
+            
+            inputEl.addEventListener('input', function() {
+                valueEl.textContent = this.value;
+            });
+        });
+        
+        // Manual Form Submission
+        document.getElementById('manualForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const data = {
+                N: parseFloat(document.getElementById('nInput').value),
+                P: parseFloat(document.getElementById('pInput').value),
+                K: parseFloat(document.getElementById('kInput').value),
+                temperature: parseFloat(document.getElementById('tempInput').value),
+                humidity: parseFloat(document.getElementById('humidityInput').value),
+                ph: parseFloat(document.getElementById('phInput').value),
+                rainfall: parseFloat(document.getElementById('rainfallInput').value)
+            };
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResult(result.crop);
+                } else {
+                    showAlert('danger', result.error || 'Prediction failed');
+                }
+            } catch (error) {
+                showAlert('danger', 'Error: ' + error.message);
+            }
+        });
+        
+        // AI Form Submission
+        document.getElementById('aiForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const description = document.getElementById('aiInput').value.trim();
+            const spinner = document.getElementById('aiSpinner');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            if (!description) {
+                showAlert('warning', 'Please describe your farm conditions', 'aiAlert');
+                return;
+            }
+            
+            // Show loading state
+            spinner.classList.remove('d-none');
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/ai-analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ description })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Auto-fill the manual form with AI results
+                    const params = result.parameters;
+                    document.getElementById('nInput').value = params.N;
+                    document.getElementById('pInput').value = params.P;
+                    document.getElementById('kInput').value = params.K;
+                    document.getElementById('tempInput').value = params.temperature;
+                    document.getElementById('humidityInput').value = params.humidity;
+                    document.getElementById('phInput').value = params.ph;
+                    document.getElementById('rainfallInput').value = params.rainfall;
+                    
+                    // Update displayed values
+                    document.getElementById('nValue').textContent = params.N;
+                    document.getElementById('pValue').textContent = params.P;
+                    document.getElementById('kValue').textContent = params.K;
+                    document.getElementById('tempValue').textContent = params.temperature;
+                    document.getElementById('humidityValue').textContent = params.humidity;
+                    document.getElementById('phValue').textContent = params.ph;
+                    document.getElementById('rainfallValue').textContent = params.rainfall;
+                    
+                    showAlert('success', '✓ AI analysis complete! Parameters auto-filled. Now click "Predict Crop".', 'aiAlert');
+                    
+                    // Auto-submit prediction
+                    setTimeout(() => {
+                        document.getElementById('manualForm').dispatchEvent(new Event('submit'));
+                    }, 1000);
+                } else {
+                    showAlert('danger', result.error || 'AI analysis failed', 'aiAlert');
+                }
+            } catch (error) {
+                showAlert('danger', 'Error: ' + error.message, 'aiAlert');
+            } finally {
+                spinner.classList.add('d-none');
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Show result card
+        function showResult(crop) {
+            const resultCard = document.getElementById('resultCard');
+            const resultCrop = document.getElementById('resultCrop');
+            
+            resultCrop.textContent = crop;
+            resultCard.classList.add('show');
+            
+            // Scroll to result
+            resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        // Show alert message
+        function showAlert(type, message, targetId = 'aiAlert') {
+            const alertDiv = document.getElementById(targetId);
+            alertDiv.innerHTML = `
+                <div class="alert alert-${type} alert-custom alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

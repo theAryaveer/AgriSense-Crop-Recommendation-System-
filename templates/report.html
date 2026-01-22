@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriSense Report #{{ prediction.id }}</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/agrisense_logo.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2d6635;
+            --accent: #f39c12;
+            --tech-blue: #0dcaf0;
+            --bg-soft: #f8fafc;
+        }
+
+        body {
+            background: var(--bg-soft);
+            font-family: 'Segoe UI', sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Hero Section */
+        .report-header {
+            background: linear-gradient(135deg, #1e4d2b 0%, #2d6635 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: -3rem;
+            position: relative;
+            z-index: 0;
+            border-bottom-left-radius: 50px;
+            border-bottom-right-radius: 50px;
+            box-shadow: 0 10px 30px rgba(45, 102, 53, 0.2);
+        }
+
+        /* Main Container */
+        .content-container {
+            position: relative;
+            z-index: 10;
+            margin-top: 0;
+            padding-bottom: 3rem;
+        }
+
+        /* Cards */
+        .premium-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            border: none;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .premium-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header-styled {
+            background: #f1f8e9;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* Top Crop Specifics */
+        .winner-section {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .winner-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #fff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .highlight-stat {
+            background: linear-gradient(45deg, #f39c12, #f1c40f);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.3);
+        }
+
+        /* Progress Bars */
+        .nutrient-bar-container {
+            margin-bottom: 1rem;
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 20px;
+            background: #e9ecef;
+        }
+
+        /* Action List */
+        .action-list li {
+            padding: 0.8rem 0;
+            border-bottom: 1px dashed #ddd;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .action-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* Print Button */
+        .fab-print {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .fab-print:hover {
+            transform: scale(1.1);
+        }
+
+        @media print {
+            .fab-print {
+                display: none;
+            }
+
+            /* User Requested Print Fix */
+            .bg-light {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                background-color: #f8f9fa !important;
+            }
+
+            .premium-card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+
+            body {
+                background: white;
+            }
+
+            .report-header {
+                padding: 1rem 0;
+                color: black;
+                background: white;
+                margin-bottom: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+
+    <header class="report-header text-center">
+        <div class="container">
+            <div class="d-flex justify-content-center align-items-center mb-1">
+                <img src="{{ url_for('static', filename='img/agrisense_logo.png') }}" alt="AgriSense Logo" height="50"
+                    class="me-3 bg-white rounded-circle p-1">
+                <span class="h3 mb-0 text-white fw-bold">AgriSense</span>
+            </div>
+            <p class="mb-1 opacity-75 small text-uppercase ls-1">Smart Farming Assistant</p>
+            <h1 class="display-6 fw-bold mb-2">Detailed Crop Advisor Report</h1>
+            <p class="lead mb-0 fs-6"><i class="fas fa-check-circle me-2"></i>Analysis Complete • {{
+                prediction.date.strftime('%B %d, %Y') }}</p>
+        </div>
+    </header>
+
+    <div class="container content-container">
+
+        <!-- SECTION 0: REPORT INFORMATION CARD (Updated) -->
+        <div class="card mb-4 border-success-subtle bg-light shadow-sm">
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <!-- Col A: Profile -->
+                    <div class="col-md-5 border-end border-secondary-subtle">
+                        <small class="text-uppercase text-muted fw-bold ls-1 d-block mb-1"
+                            style="font-size: 0.75rem;">Report Generated For:</small>
+                        <h3 class="fw-bold text-success mb-1">{{ user.name }}</h3>
+                        <p class="text-dark mb-0"><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{
+                            user.city }}</p>
+                        <small class="text-muted mt-2 d-block">Report ID: #{{ prediction.id }} | {{
+                            prediction.date.strftime('%d %b %Y') }}</small>
+                    </div>
+
+                    <!-- Col B: Inputs -->
+                    <div class="col-md-7 ps-md-4 mt-3 mt-md-0">
+                        <div class="d-flex justify-content-between mb-2">
+                            <small class="text-uppercase text-muted fw-bold ls-1" style="font-size: 0.75rem;">Based on
+                                Soil Conditions:</small>
+                            {% if results.soil_data.weather_source == 'live' %}
+                            <span class="badge bg-success" style="font-size: 0.7em;">Live Weather 🟢</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark" style="font-size: 0.7em;">AI Estimate
+                                🤖</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Mini Grid -->
+                        <div class="row g-2 text-center text-dark" style="font-size: 0.9rem;">
+                            <div class="col-3 border-end">
+                                <div class="fw-bold">{{ results.soil_data.N }}</div>
+                                <small class="text-muted" style="font-size: 0.7em;">Nitrogen</small>
+                            </div>
+                            <div class="col-3 border-end">
+                                <div class="fw-bold">{{ results.soil_data.P }}</div>
+                                <small class="text-muted" style="font-size: 0.7em;">Phosphorus</small>
+                            </div>
+                            <div class="col-3 border-end">
+                                <div class="fw-bold">{{ results.soil_data.K }}</div>
+                                <small class="text-muted" style="font-size: 0.7em;">Potassium</small>
+                            </div>
+                            <div class="col-3">
+                                <div class="fw-bold">{{ results.soil_data.ph }}</div>
+                                <small class="text-muted" style="font-size: 0.7em;">pH Level</small>
+                            </div>
+                            <!-- Row 2 -->
+                            <div class="col-6 border-end border-top pt-2 mt-2">
+                                <strong class="text-primary">{{ results.soil_data.rainfall }} mm</strong>
+                                <small class="d-block text-muted" style="font-size: 0.7em;">Rainfall</small>
+                            </div>
+                            <div class="col-6 border-top pt-2 mt-2">
+                                <strong class="text-primary">{{ results.soil_data.temperature }}°C</strong>
+                                <small class="d-block text-muted" style="font-size: 0.7em;">Temperature</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 1: TOP PREDICTION DEEP DIVE -->
+        <div class="premium-card">
+            <div class="card-body p-4 p-lg-5">
+                <div class="row align-items-center mb-4">
+                    <div class="col-md-auto text-center">
+                        <img src="{{ url_for('static', filename='img/crops/' + results.top_prediction.crop_en.lower() + '.jpg') }}"
+                            class="winner-img"
+                            onerror="this.src='{{ url_for('static', filename='img/crops/default.jpg') }}'">
+                    </div>
+                    <div class="col-md">
+                        <span class="badge bg-success mb-2 px-3 py-2 rounded-pill">Top Recommendation ({{
+                            results.top_prediction.confidence }}% Match)</span>
+                        <h2 class="display-4 fw-bold text-dark">{{ results.top_prediction.crop }}</h2>
+                        <p class="text-muted">Currently the most profitable and suitable crop for your soil
+                            conditions.
+                        </p>
+                    </div>
+                    <div class="col-md-auto mt-3 mt-md-0">
+                        <div class="highlight-stat">
+                            <small class="d-block text-white-50 text-uppercase fw-bold ls-1">Potential
+                                Revenue</small>
+                            <span class="fs-2 fw-bold">₹{{
+                                "{:,}".format(results.top_prediction.analysis.economics.revenue) }}</span>
+                            <small class="d-block">per hectare</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- ECONOMICS -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3 h-100 border">
+                            <h5 class="text-success fw-bold mb-3"><i class="fas fa-coins me-2"></i>Unit
+                                Economics</h5>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Expected Price</span>
+                                <span class="fw-bold">₹{{ results.top_prediction.analysis.economics.price
+                                    }}/kg</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Yield/Hectare</span>
+                                <span class="fw-bold">{{ results.top_prediction.analysis.economics.yield }}
+                                    kg</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                                <span>Net Profit Est.</span>
+                                <span class="fw-bold text-success">High</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NUTRIENT GAP Analysis -->
+                    <div class="col-md-8">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-chart-bar me-2 text-primary"></i>Soil Nutrient
+                            Analysis (Your Level vs Required)</h5>
+
+                        {% set soil = results.soil_data %}
+                        {% set gap = results.top_prediction.analysis.gap %}
+
+                        <!-- Nitrogen -->
+                        <div class="nutrient-bar-container">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <strong>Nitrogen (N)</strong>
+                                <span class="{{ 'text-danger' if gap.N > 10 else 'text-success' }}">
+                                    {% if gap.N > 0 %}Deficit: {{ gap.N }} kg/ha{% else %}Sufficient{% endif %}
+                                </span>
+                            </div>
+                            <div class="progress">
+                                {% set target_n = soil.N + gap.N %}
+                                <div class="progress-bar bg-success"
+                                    style="width: {{ (soil.N / target_n * 100) if target_n > 0 else 0 }}%">
+                                </div>
+                                <div class="progress-bar bg-warning opacity-50"
+                                    style="width: {{ (gap.N / target_n * 100) if target_n > 0 else 0 }}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Phosphorus -->
+                        <div class="nutrient-bar-container">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <strong>Phosphorus (P)</strong>
+                                <span class="{{ 'text-danger' if gap.P > 10 else 'text-success' }}">
+                                    {% if gap.P > 0 %}Deficit: {{ gap.P }} kg/ha{% else %}Sufficient{% endif %}
+                                </span>
+                            </div>
+                            <div class="progress">
+                                {% set target_p = soil.P + gap.P %}
+                                <div class="progress-bar bg-success"
+                                    style="width: {{ (soil.P / target_p * 100) if target_p > 0 else 0 }}%">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Potassium -->
+                        <div class="nutrient-bar-container">
+                            <div class="d-flex justify-content-between small mb-1">
+                                <strong>Potassium (K)</strong>
+                                <span class="{{ 'text-danger' if gap.K > 10 else 'text-success' }}">
+                                    {% if gap.K > 0 %}Deficit: {{ gap.K }} kg/ha{% else %}Sufficient{% endif %}
+                                </span>
+                            </div>
+                            <div class="progress">
+                                {% set target_k = soil.K + gap.K %}
+                                <div class="progress-bar bg-success"
+                                    style="width: {{ (soil.K / target_k * 100) if target_k > 0 else 0 }}%">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- FERTILIZER PRESCRIPTION -->
+                <div class="mt-4 p-4 bg-light rounded-3 border-start border-4 border-success">
+                    <h5 class="fw-bold text-dark mb-3"><i
+                            class="fas fa-prescription-bottle-alt me-2 text-success"></i>Required Fertilizer
+                        Application
+                    </h5>
+                    <div class="row">
+                        {% for fert, amount in results.top_prediction.analysis.fertilizer.bags.items() %}
+                        <div class="col-md-3 mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <div>
+                                    <strong class="d-block">{{ fert }}</strong>
+                                    <span class="text-muted">{{ amount }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: COMPARATIVE ANALYSIS -->
+        <h3 class="fw-bold mb-4 ps-2 border-start border-4 border-warning">Alternative Profitable Options</h3>
+        <div class="row">
+            {% for alt in results.alternatives %}
+            <div class="col-md-6">
+                <div class="premium-card h-100">
+                    <div class="card-header-styled d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-secondary me-2">Option {{ loop.index + 1 }}</span>
+                            {{ alt.crop }}
+                        </div>
+                        <span class="text-success small">{{ alt.confidence }}% Match</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center mb-3">
+                            <div class="col-auto">
+                                <img src="{{ url_for('static', filename='img/crops/' + alt.crop_en.lower() + '.jpg') }}"
+                                    style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover;"
+                                    onerror="this.src='{{ url_for('static', filename='img/crops/default.jpg') }}'">
+                            </div>
+                            <div class="col">
+                                <h4 class="fw-bold text-success mb-0">₹{{
+                                    "{:,}".format(alt.analysis.economics.revenue)
+                                    }}</h4>
+                                <small class="text-muted">Potential Revenue / ha</small>
+                            </div>
+                        </div>
+
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <td class="text-muted">Market Price:</td>
+                                <td class="fw-bold text-end">₹{{ alt.analysis.economics.price }}/kg</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Exp. Yield:</td>
+                                <td class="fw-bold text-end">{{ alt.analysis.economics.yield }} kg/ha</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Fertilizer Cost:</td>
+                                <td class="fw-bold text-end text-danger">Medium</td>
+                            </tr>
+                        </table>
+
+                        <div class="mt-3 pt-3 border-top">
+                            <small class="fw-bold text-muted d-block mb-2">Key Requirements:</small>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for fert, amount in alt.analysis.fertilizer.bags.items() %}
+                                <span class="badge bg-light text-dark border">{{ fert }}: {{ amount }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <!-- Floating Print Button -->
+    <div class="fab-print" onclick="window.print()" title="Print Report">
+        <i class="fas fa-print"></i>
+    </div>
+
+    <!-- Bootstrap Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
