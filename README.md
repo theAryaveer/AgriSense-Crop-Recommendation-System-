@@ -6,7 +6,7 @@ An AI-powered web application that recommends optimal crops based on soil and we
 
 - **Manual Input**: Enter 7 soil and weather parameters using interactive sliders
 - **AI Consultant**: Describe your farm in natural language, and Gemini AI extracts the parameters
-- **Instant Predictions**: Get crop recommendations using a trained Random Forest model (99.32% accuracy)
+- **Instant Predictions**: Get crop recommendations using a trained Random Forest model (92.32% accuracy)
 - **Modern UI**: Responsive, agriculture-themed dashboard with glassmorphism design
 
 ## Prerequisites
