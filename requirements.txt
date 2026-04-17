@@ -6,3 +6,4 @@ pandas
 joblib
 scikit-learn
 python-dotenv==1.0.0
+gunicorn
