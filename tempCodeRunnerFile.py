@@ -20,9 +20,6 @@ from contextlib import asynccontextmanager
 
 load_dotenv()
 
-# Get base directory of this file
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 # ============================================================
 # DATABASE SETUP
 # ============================================================
@@ -165,41 +162,38 @@ class EstimateRequest(BaseModel):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 
+    # Create MySQL tables
     Base.metadata.create_all(bind=engine)
     print("✓ MySQL tables created")
 
+    # Load ML model files
     global crop_model, crop_dict, scaler, gemini_model, crop_info
 
-    model_dir = os.path.join(BASE_DIR, "model")
-
-    crop_dict_path = os.path.join(model_dir, "crop_dict.pkl")
-    if os.path.exists(crop_dict_path):
-        crop_dict = pickle.load(open(crop_dict_path, "rb"))
+    if os.path.exists("model/crop_dict.pkl"):
+        crop_dict = pickle.load(open("model/crop_dict.pkl", "rb"))
         print(f"✓ Crop dictionary loaded ({len(crop_dict)} crops)")
     else:
         print("✗ crop_dict.pkl not found")
 
-    model_path = os.path.join(model_dir, "best_crop_model.pkl")
-    if os.path.exists(model_path):
-        crop_model = joblib.load(model_path)
+    if os.path.exists("model/best_crop_model.pkl"):
+        crop_model = joblib.load("model/best_crop_model.pkl")
         print("✓ ML model loaded")
     else:
         print("✗ best_crop_model.pkl not found")
 
-    scaler_path = os.path.join(model_dir, "scaler.pkl")
-    if os.path.exists(scaler_path):
-        scaler = joblib.load(scaler_path)
+    if os.path.exists("model/scaler.pkl"):
+        scaler = joblib.load("model/scaler.pkl")
         print("✓ Scaler loaded")
     else:
         print("✗ scaler.pkl not found")
 
-    crop_info_path = os.path.join(BASE_DIR, "crop_info.json")
-    if os.path.exists(crop_info_path):
-        crop_info = json.load(open(crop_info_path, encoding="utf-8"))
+    if os.path.exists("crop_info.json"):
+        crop_info = json.load(open("crop_info.json", encoding="utf-8"))
         print(f"✓ Crop info loaded ({len(crop_info)} crops)")
     else:
         print("✗ crop_info.json not found")
 
+    # Configure Gemini
     api_key = os.getenv("GEMINI_API_KEY")
     if api_key:
         genai.configure(api_key=api_key)
@@ -225,18 +219,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files with absolute path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 app.mount(
     "/static",
     StaticFiles(directory=os.path.join(BASE_DIR, "static")),
-    name="static",
+    name="static"
 )
-
-# Templates with absolute path
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 # ============================================================
-# SESSION — simple in-memory
+# SESSION — simple in-memory (replace with Redis in production)
 # ============================================================
 
 sessions: dict = {}
@@ -313,22 +306,35 @@ def estimate_soil_params(
     manual_humid: str = None,
     extra_context: str = "",
 ) -> dict:
+    """
+    Ask Gemini to estimate soil parameters.
 
+    Priority for temperature and humidity —
+    1. Farmer entered manually  → use that
+    2. OpenWeather live data    → use that
+    3. Nothing available        → ask Gemini to estimate
+    """
+
+    # Decide what temperature and humidity to use
     use_temp  = None
     use_humid = None
     weather_source = "ai"
 
     if manual_temp:
+        # Farmer typed manually — highest priority
         use_temp       = float(manual_temp)
         use_humid      = float(manual_humid) if manual_humid else None
         weather_source = "manual"
 
     elif live_weather:
+        # Live weather available — use it
         use_temp       = live_weather["temp"]
         use_humid      = live_weather["humidity"]
         weather_source = "live"
 
+    # Build prompt based on what we know
     if use_temp is not None and use_humid is not None:
+        # Temperature and humidity known — only ask Gemini for soil
         prompt = f"""
 I have weather data for {location}:
 - Temperature: {use_temp}°C
@@ -347,6 +353,7 @@ Return ONLY this JSON — no extra text:
 }}
 """
     else:
+        # Nothing known — ask Gemini for everything
         prompt = f"""
 Estimate typical soil and climate parameters for {location}.
 {extra_context}
@@ -365,6 +372,7 @@ Return ONLY this JSON — no extra text:
 
     params = _call_gemini(prompt)
 
+    # Inject temperature and humidity if we have them
     if use_temp is not None:
         params["temperature"] = use_temp
     if use_humid is not None:
@@ -372,6 +380,7 @@ Return ONLY this JSON — no extra text:
 
     params["weather_source"] = weather_source
 
+    # Convert all values to float
     for key in ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]:
         params[key] = float(params[key])
 
@@ -435,6 +444,7 @@ def start(body: StartRequest, request: Request, db: Session = Depends(get_db)):
             detail={"en": "Name and city are required", "hi": "नाम और शहर आवश्यक हैं"},
         )
 
+    # Check if user already exists
     user = None
     if body.phone:
         user = db.query(User).filter(User.phone == body.phone).first()
@@ -451,6 +461,7 @@ def start(body: StartRequest, request: Request, db: Session = Depends(get_db)):
     else:
         print(f"✓ Existing user: {user.name} (ID {user.id})")
 
+    # Save to session
     sid = request.cookies.get("session_id", "default")
     sessions[sid] = {
         "user_id":     user.id,
@@ -498,6 +509,7 @@ def estimate(body: EstimateRequest):
             detail={"en": "Location required", "hi": "स्थान आवश्यक है"},
         )
 
+    # Build extra context from questionnaire answers
     ctx_lines = [
         f"Soil type: {body.soil_type}"                    if body.soil_type           else "",
         f"Water availability: {body.water_availability}"  if body.water_availability  else "",
@@ -505,6 +517,7 @@ def estimate(body: EstimateRequest):
         f"Previous fertilizer used: {body.fertilizer_usage}" if body.fertilizer_usage else "",
     ]
 
+    # Add manual temperature and humidity to context if provided
     if body.temperature:
         ctx_lines.append(f"Target temperature: {body.temperature}°C")
     if body.humidity:
@@ -513,6 +526,7 @@ def estimate(body: EstimateRequest):
     extra = "\n".join(line for line in ctx_lines if line)
 
     try:
+        # Get live weather — but only use if farmer did not enter manually
         live = get_real_weather(body.location)
 
         params = estimate_soil_params(
@@ -536,10 +550,11 @@ def estimate(body: EstimateRequest):
 @app.post("/predict")
 def predict(body: PredictRequest, request: Request, db: Session = Depends(get_db)):
 
+    # Check all ML files are loaded
     for label, obj in [
-        ("Model",     crop_model),
-        ("Crop dict", crop_dict),
-        ("Scaler",    scaler),
+        ("Model",         crop_model),
+        ("Crop dict",     crop_dict),
+        ("Scaler",        scaler),
     ]:
         if obj is None:
             raise HTTPException(
@@ -547,6 +562,7 @@ def predict(body: PredictRequest, request: Request, db: Session = Depends(get_db
                 detail={"en": f"{label} not loaded", "hi": f"{label} लोड नहीं हुआ"},
             )
 
+    # Collect all 7 input values
     values = {
         "N":           body.N,
         "P":           body.P,
@@ -557,10 +573,12 @@ def predict(body: PredictRequest, request: Request, db: Session = Depends(get_db
         "rainfall":    body.rainfall,
     }
 
+    # Scale inputs and run ML model
     features_scaled = scaler.transform(pd.DataFrame([values]))
     probabilities   = crop_model.predict_proba(features_scaled)[0]
     top3_indices    = probabilities.argsort()[-3:][::-1]
 
+    # Build top 3 predictions
     user_soil       = {k: values[k] for k in ["N", "P", "K"]}
     top_predictions = []
 
@@ -583,6 +601,7 @@ def predict(body: PredictRequest, request: Request, db: Session = Depends(get_db
         "soil_data":      soil_data,
     }
 
+    # Save prediction to MySQL
     try:
         sess    = get_session(request)
         user_id = sess.get("user_id")
@@ -659,6 +678,7 @@ def report(prediction_id: int, request: Request, db: Session = Depends(get_db)):
             "soil_data":    json.loads(prediction.soil_data),
         }
 
+    # Regenerate analysis if missing on old records
     user_soil = {k: results["soil_data"].get(k, 0) for k in ["N", "P", "K"]}
     for entry in [results["top_prediction"]] + results.get("alternatives", []):
         if "analysis" not in entry or "fertilizer" not in entry.get("analysis", {}):

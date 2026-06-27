@@ -166,7 +166,7 @@ class EstimateRequest(BaseModel):
 async def lifespan(app: FastAPI):
 
     Base.metadata.create_all(bind=engine)
-    print("✓ MySQL tables created")
+    print("[OK] MySQL tables created")
 
     global crop_model, crop_dict, scaler, gemini_model, crop_info
 
@@ -175,38 +175,38 @@ async def lifespan(app: FastAPI):
     crop_dict_path = os.path.join(model_dir, "crop_dict.pkl")
     if os.path.exists(crop_dict_path):
         crop_dict = pickle.load(open(crop_dict_path, "rb"))
-        print(f"✓ Crop dictionary loaded ({len(crop_dict)} crops)")
+        print(f"[OK] Crop dictionary loaded ({len(crop_dict)} crops)")
     else:
-        print("✗ crop_dict.pkl not found")
+        print("[FAIL] crop_dict.pkl not found")
 
     model_path = os.path.join(model_dir, "best_crop_model.pkl")
     if os.path.exists(model_path):
         crop_model = joblib.load(model_path)
-        print("✓ ML model loaded")
+        print("[OK] ML model loaded")
     else:
-        print("✗ best_crop_model.pkl not found")
+        print("[FAIL] best_crop_model.pkl not found")
 
     scaler_path = os.path.join(model_dir, "scaler.pkl")
     if os.path.exists(scaler_path):
         scaler = joblib.load(scaler_path)
-        print("✓ Scaler loaded")
+        print("[OK] Scaler loaded")
     else:
-        print("✗ scaler.pkl not found")
+        print("[FAIL] scaler.pkl not found")
 
     crop_info_path = os.path.join(BASE_DIR, "crop_info.json")
     if os.path.exists(crop_info_path):
         crop_info = json.load(open(crop_info_path, encoding="utf-8"))
-        print(f"✓ Crop info loaded ({len(crop_info)} crops)")
+        print(f"[OK] Crop info loaded ({len(crop_info)} crops)")
     else:
-        print("✗ crop_info.json not found")
+        print("[FAIL] crop_info.json not found")
 
     api_key = os.getenv("GEMINI_API_KEY")
     if api_key:
         genai.configure(api_key=api_key)
         gemini_model = genai.GenerativeModel("gemini-2.5-flash")
-        print("✓ Gemini configured")
+        print("[OK] Gemini configured")
     else:
-        print("✗ GEMINI_API_KEY not set — AI features disabled")
+        print("[FAIL] GEMINI_API_KEY not set - AI features disabled")
 
     yield
 
@@ -286,7 +286,7 @@ def _call_gemini(prompt: str) -> dict:
 def get_real_weather(city: str):
     api_key = os.getenv("OPENWEATHER_API_KEY", "")
     if not api_key:
-        print("⚠ Weather API key not set")
+        print("[WARN] Weather API key not set")
         return None
     try:
         r = requests.get(
@@ -300,9 +300,9 @@ def get_real_weather(city: str):
                 "temp":     round(d["main"]["temp"],     1),
                 "humidity": round(d["main"]["humidity"], 1),
             }
-        print(f"⚠ Weather API returned {r.status_code} for {city}")
+        print(f"[WARN] Weather API returned {r.status_code} for {city}")
     except Exception as e:
-        print(f"⚠ Weather request failed: {e}")
+        print(f"[WARN] Weather request failed: {e}")
     return None
 
 
@@ -447,9 +447,9 @@ def start(body: StartRequest, request: Request, db: Session = Depends(get_db)):
         db.add(user)
         db.commit()
         db.refresh(user)
-        print(f"✓ New user: {body.name} ({body.city})")
+        print(f"[OK] New user: {body.name} ({body.city})")
     else:
-        print(f"✓ Existing user: {user.name} (ID {user.id})")
+        print(f"[OK] Existing user: {user.name} (ID {user.id})")
 
     sid = request.cookies.get("session_id", "default")
     sessions[sid] = {
@@ -526,7 +526,7 @@ def estimate(body: EstimateRequest):
         return {"success": True, "parameters": params, "location": body.location}
 
     except Exception as e:
-        print(f"✗ /estimate error: {e}")
+        print(f"[FAIL] /estimate error: {e}")
         raise HTTPException(
             status_code=500,
             detail={"en": f"AI Error: {e}", "hi": "AI त्रुटि"},
@@ -603,12 +603,12 @@ def predict(body: PredictRequest, request: Request, db: Session = Depends(get_db
             db.commit()
             db.refresh(pred)
             response_data["prediction_id"] = pred.id
-            print(f"✓ Saved prediction #{pred.id}: "
+            print(f"[OK] Saved prediction #{pred.id}: "
                   f"{top_predictions[0]['crop_en']} "
                   f"({top_predictions[0]['confidence']}%)")
 
     except Exception as e:
-        print(f"⚠ Could not save prediction: {e}")
+        print(f"[WARN] Could not save prediction: {e}")
 
     return response_data
 
@@ -685,7 +685,7 @@ def report(prediction_id: int, request: Request, db: Session = Depends(get_db)):
 if __name__ == "__main__":
     import uvicorn
     print("\n" + "=" * 60)
-    print("🌾  AgriSense — Crop Recommendation System")
+    print("  AgriSense - Crop Recommendation System")
     print("=" * 60)
     print("  http://127.0.0.1:5000   |   Press Ctrl+C to stop\n")
     uvicorn.run("main:app", host="127.0.0.1", port=5000, reload=True)
